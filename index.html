@@ -1,21 +1,22 @@
-<!DOCTYPE html>
-<html lang="it">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Telegram Mini App</title>
-
-  <!-- Telegram SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <h1>Mini App Telegram</h1>
-  <button id="load">Carica dati</button>
+  <h1>MINI APP PADVA TRAVELERS</h1>
 
-  <div id="output"></div>
+  <div class="container">
+    <form id="searchForm" class="search-form container_form">
+      <input type="text" name="partenza" placeholder="stazione partenza" />
+      <input type="text" name="arrivo" placeholder="stazione arrivo" />
+      <button type="submit">Cerca</button>
+    </form>
 
+    <div id="output"></div>
+  </div>
   <script src="script.js"></script>
+
 </body>
 </html>
