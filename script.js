@@ -1,21 +1,31 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-document.getElementById("load").onclick = async () => {
-  document.getElementById("output").innerText = "Caricamento...";
+// Seleziona il form (sostituisci 'myForm' con l'ID del tuo form)
+const form = document.getElementById("myForm");
+const output = document.getElementById("output");
 
-  const res = await fetch("https://TUO_BACKEND/api/user-info", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      user_id: tg.initDataUnsafe.user.id
-    })
-  });
+form.addEventListener("submit", (e) => {
+  e.preventDefault(); // Previene il refresh della pagina
 
-  const data = await res.json();
+  try {
+    output.innerText = "Caricamento...";
 
-  document.getElementById("output").innerHTML = `
-    <p><b>User:</b> ${data.username}</p>
-    <p><b>Crediti:</b> ${data.credits}</p>
-  `;
-};
+    // Raccogli i dati del form
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    const jsonData = JSON.stringify(data);
+
+    console.log("Invio dati:", jsonData);
+
+    // Invia i dati al bot Telegram
+    tg.sendData(jsonData);
+
+    // Dopo aver inviato i dati, è pratica comune chiudere la Mini App.
+    // Il bot può quindi inviare un messaggio di conferma nella chat.
+    // tg.close();
+  } catch (error) {
+    console.error("Errore durante l'invio del form:", error);
+    output.innerText = "Si è verificato un errore. Riprova.";
+  }
+});
