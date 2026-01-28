@@ -1,31 +1,112 @@
-const tg = window.Telegram.WebApp;
-tg.expand();
+document.addEventListener('DOMContentLoaded', () => {
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
 
-// Seleziona il form (sostituisci 'myForm' con l'ID del tuo form)
-const form = document.getElementById("myForm");
-const output = document.getElementById("output");
+    const stazionePartenza = document.getElementById('partenza');
+    const stazioneArrivo = document.getElementById('arrivo');
+    const suggestionsContainer = document.getElementById('suggestions');
+    let stazioni = [];
+    let searchTimeout;
 
-form.addEventListener("submit", (e) => {
-  e.preventDefault(); // Previene il refresh della pagina
+    // Carica le stazioni dal file
+    fetch('stazioni.txt')
+        .then(response => response.text())
+        .then(text => {
+            stazioni = text.split('\n').filter(s => s.trim() !== ''); // Pulisce da righe vuote
+        })
+        .catch(error => console.error('Errore nel caricamento delle stazioni:', error));
 
-  try {
-    output.innerText = "Caricamento...";
+    function sendDataToBot(partenza, arrivo) {
+        if (partenza && arrivo) {
+            const data = { partenza, arrivo };
+            tg.sendData(JSON.stringify(data));
+            tg.close();
+        }
+    }
 
-    // Raccogli i dati del form
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData);
-    const jsonData = JSON.stringify(data);
+    function generateSuggestions(query) {
+      suggestionsContainer.innerHTML = '';
+      const partenza_utente = stazionePartenza.value.trim().toLowerCase();
+      const arrivo_utente = stazioneArrivo.value.trim().toLowerCase();
 
-    console.log("Invio dati:", jsonData);
+      // Ora controlliamo solo che la PARTENZA abbia almeno 3 caratteri
+      if (partenza_utente.length < 3) {
+          return;
+      }
 
-    // Invia i dati al bot Telegram
-    tg.sendData(jsonData);
+      const possibiliPartenze = stazioni.filter(s => s.toLowerCase().startsWith(partenza_utente));
+      // Filtriamo gli arrivi solo se l'utente ha scritto almeno 3 caratteri, altrimenti lista vuota
+      const possibiliArrivi = arrivo_utente.length >= 3 
+          ? stazioni.filter(s => s.toLowerCase().startsWith(arrivo_utente)) 
+          : [];
 
-    // Dopo aver inviato i dati, è pratica comune chiudere la Mini App.
-    // Il bot può quindi inviare un messaggio di conferma nella chat.
-    // tg.close();
-  } catch (error) {
-    console.error("Errore durante l'invio del form:", error);
-    output.innerText = "Si è verificato un errore. Riprova.";
-  }
+      // Se non trovo nessuna stazione di partenza, esco
+      if (possibiliPartenze.length === 0) {
+          return;
+      }
+
+      const fragment = document.createDocumentFragment();
+
+      // CASO A: Abbiamo stazioni di arrivo compatibili (mostriamo combinazioni)
+      if (possibiliArrivi.length > 0) {
+          possibiliPartenze.forEach(dep => {
+              possibiliArrivi.forEach(arr => {
+                  if (dep === arr) return;
+
+                  const suggestionItem = document.createElement('p');
+                  suggestionItem.className = 'suggestion-item';
+                  suggestionItem.textContent = `${dep} → ${arr}`;
+                  
+                  suggestionItem.addEventListener('click', () => {
+                      sendDataToBot(dep, arr);
+                  });
+                  fragment.appendChild(suggestionItem);
+              });
+          });
+      } 
+      // CASO B: L'arrivo è vuoto o non ha match (mostriamo solo Partenza →)
+      else {
+          possibiliPartenze.forEach(dep => {
+              const suggestionItem = document.createElement('p');
+              suggestionItem.className = 'suggestion-item';
+              suggestionItem.textContent = `${dep} →`; // Solo partenza con freccia
+              
+              suggestionItem.addEventListener('click', () => {
+                  // Qui decidi cosa fare: magari scrivi la stazione nel campo partenza
+                  stazionePartenza.value = dep;
+                  suggestionsContainer.innerHTML = ''; 
+              });
+              fragment.appendChild(suggestionItem);
+          });
+      }
+
+      suggestionsContainer.appendChild(fragment);
+    }
+
+    stazionePartenza.addEventListener('input', () => {
+        const query = stazionePartenza.value;
+        // Usa un timeout per non eseguire la ricerca ad ogni singolo carattere digitato
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            generateSuggestions(query);
+        }, 150); // Un piccolo ritardo per migliorare le performance
+    });
+
+    stazioneArrivo.addEventListener('input', () => {
+        const query = stazioneArrivo.value;
+        // Usa un timeout per non eseguire la ricerca ad ogni singolo carattere digitato
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            generateSuggestions(query);
+        }, 150); // Un piccolo ritardo per migliorare le performance
+    });
+
+    // // Chiudi i suggerimenti se si clicca altrove
+    // document.addEventListener('click', (e) => {
+    //     // Assicurati che il click non sia sull'input o sulla lista dei suggerimenti
+    //     if (!suggestionsContainer.contains(e.target) && e.target !== stazionePartenza) {
+    //         suggestionsContainer.innerHTML = '';
+    //     }
+    // });
 });

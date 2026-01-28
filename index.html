@@ -6,14 +6,18 @@
 </head>
 <body>
 
-  <h1>MINI APP PADVA TRAVELERS</h1>
+  <h1>MINI APP PADOVA TRAVELERS</h1>
 
   <div class="container">
     <form id="myForm" class="search-form container_form">
-      <input type="text" name="campo1" placeholder="stazione partenza" />
-      <input type="text" name="arrivo" placeholder="stazione arrivo" />
+      <input id="partenza" type="text" name="campo1" placeholder="stazione partenza" />
+      <input id="arrivo" type="text" name="arrivo" placeholder="stazione arrivo" />
       <button type="submit" id = "cerca">Cerca</button>
     </form>
+
+    <div id="suggestions">
+
+    </div>
 
     <div id="output"></div>
   </div>

@@ -28,3 +28,22 @@ body {
   padding: 20px;
   font-size: 30px;
 }
+
+#suggestions {
+  background-color: white;
+  margin: 0px;
+  padding: 0px;
+}
+
+#suggestions p {
+  background-color: LightGray;
+  margin: 1px;
+  padding: 5px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+#suggestions p:hover {
+    background-color: gray;
+    color: red;
+}
