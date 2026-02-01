@@ -54,11 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
               possibiliArrivi.forEach(arr => {
                   if (dep === arr) return;
 
-                  const suggestionItem = document.createElement('p');
-                  suggestionItem.className = 'suggestion-item';
+                  const suggestionItem = document.createElement('a');
+                  suggestionItem.href = '#';
+                  suggestionItem.className = 'list-group-item list-group-item-action';
                   suggestionItem.textContent = `${dep} → ${arr}`;
                   
-                  suggestionItem.addEventListener('click', () => {
+                  suggestionItem.addEventListener('click', (e) => {
+                      e.preventDefault();
                       sendDataToBot(dep, arr);
                   });
                   fragment.appendChild(suggestionItem);
@@ -68,11 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
       // CASO B: L'arrivo è vuoto o non ha match (mostriamo solo Partenza →)
       else {
           possibiliPartenze.forEach(dep => {
-              const suggestionItem = document.createElement('p');
-              suggestionItem.className = 'suggestion-item';
+              const suggestionItem = document.createElement('a');
+              suggestionItem.href = '#';
+              suggestionItem.className = 'list-group-item list-group-item-action';
               suggestionItem.textContent = `${dep} →`; // Solo partenza con freccia
               
-              suggestionItem.addEventListener('click', () => {
+              suggestionItem.addEventListener('click', (e) => {
+                  e.preventDefault();
                   // Qui decidi cosa fare: magari scrivi la stazione nel campo partenza
                   stazionePartenza.value = dep;
                   suggestionsContainer.innerHTML = ''; 
